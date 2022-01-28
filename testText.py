@@ -4,10 +4,10 @@ import textwrap
 from skimage.io import imread
 import matplotlib.pyplot as plt
 import scipy.fft as fp
-from skimage.util import random_noise
+import imageHybrid
 
 # Create a black image
-img = np.zeros((512,512), np.uint8)
+img = np.zeros((512,512,3), np.uint8)
 
 # Write some Text
 
@@ -33,8 +33,14 @@ for i, line in enumerate(wrapped_text):
                 font_thickness, 
                 lineType = cv2.LINE_AA)
 
+imgHi = cv2.resize(cv2.imread("TestImages/Dogge.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+imgLo = cv2.resize(cv2.imread("TestImages/Catte.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+imageHybrid.fourierHybrid(imgLo,imgHi,0.05)
+exit()
+
 #Display the image
 cv2.imshow("img",img)
+
 
 F1 = fp.fft2((img).astype(float))
 F2 = fp.fftshift(F1)
