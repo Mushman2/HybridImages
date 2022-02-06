@@ -10,9 +10,9 @@ from skimage.util import random_noise
 
 #Combine using fourier transform low and high pass filters
 def fourierHybrid(imageLow, imageHigh, n):
-    cv2.imshow("imgHi",imageHigh)
-    cv2.imshow("imgLo", imageLow)
-    cv2.waitKey(0)
+    #cv2.imshow("imgHi",imageHigh)
+    #cv2.imshow("imgLo", imageLow)
+    #cv2.waitKey(0)
 
     #TODO: Convert each image to frequency domain. 
     FHi = np.zeros(imageHigh.shape, dtype=np.csingle)
@@ -42,9 +42,9 @@ def fourierHybrid(imageLow, imageHigh, n):
     for channel in range(3): 
         imHi1[:,:,channel] = fp.ifft2(fp.ifftshift(FHi[:,:,channel])).real#.astype(np.uint8)
 
-    cv2.imshow("img2",imHi1)
+    #cv2.imshow("img2",imHi1)
     #cv2.imshow("testfft", fp.ifft2(fp.ifftshift(fp.fftshift(fp.fft2(imageHigh[:,:,0])))).real)#.astype(np.uint8))
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
     return imHi1
 
 def gaussianHybrid():

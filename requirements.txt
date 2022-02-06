@@ -2,4 +2,4 @@ opencv-python
 numpy
 scikit-image
 matplotlib
-kivy[full]
+#kivy[full]
