@@ -4,6 +4,7 @@ import imageHybrid
 import cv2
 import numpy as np
 import imageFuncs as imf
+import pagination
 
 window = tk.Tk()
 
@@ -13,7 +14,9 @@ greeting = tk.Label(text="Hybrid Image")
 
 greeting.pack()
 
-imgHi = cv2.resize(cv2.imread("TestImages/Dogge.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+#imgHi = cv2.resize(cv2.imread("TestImages/Dogge.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+document = pagination.readDocument("TestDoc1.hpd")
+imgHi, docIdx = pagination.generatePage(document, 0)
 imgLo = cv2.resize(cv2.imread("TestImages/Catte.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
 picture = imageHybrid.fourierHybrid(imgLo,imgHi,coefficient)
 img =  imf.readyImageForCanvas(picture)
