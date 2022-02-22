@@ -22,24 +22,41 @@ def generatePage(document, index):
     thickness = 1
     colour = (255,255,255)
 
-    image = np.zeros(width,height,3)
+    image = np.zeros((width,height,3))
     currentIndex = index
 
     full = False
-    heightPointer = 10
+    docEnd = False
+    heightPointer = 10 + cv2.getTextSize(document[currentIndex], font, fontScale, thickness)[0][1]
     widthPointer = 10
     while (not full):
-        size = cv2.getTextSize(document[currentIndex], font, fontScale, thickness)
-        if widthPointer + size.width < width - 10:
-            image = cv2.putText(image, document[currentIndex], (widthPointer, heightPointer), font, fontScale, colour, thickness, cv2.LINE_AA)
-            widthPointer += size.width + 10
-        else:
-            heightPointer += size.height + 10
-            widthPointer = 10
-            if heightPointer + size.height < height - 10:
+        if (document[currentIndex] == '\n'):
+            heightPointer += size[0][1] + 10
+            widthPointer = 10   
+            currentIndex += 1
+            fontScale = 1
+            thickness = 1
+        elif ((document[currentIndex] == '^')):
+            currentIndex += 1
+            fontScale = 1.5
+        else:        
+            size = cv2.getTextSize(document[currentIndex], font, fontScale, thickness)
+            if (widthPointer + size[0][0]) < (width - 10):
                 image = cv2.putText(image, document[currentIndex], (widthPointer, heightPointer), font, fontScale, colour, thickness, cv2.LINE_AA)
+                widthPointer += size[0][0] + 10
+                currentIndex += 1
             else:
+                heightPointer += size[0][1] + 10
+                widthPointer = 10
+                if heightPointer + size[0][1] < height - 10:
+                    image = cv2.putText(image, document[currentIndex], (widthPointer, heightPointer), font, fontScale, colour, thickness, cv2.LINE_AA)
+                    widthPointer += size[0][0] + 10
+                    currentIndex += 1
+                else:
+                    full = True
+            if currentIndex == len(document):
                 full = True
-    return image, currentIndex
+                docEnd = True
+    return image, currentIndex, docEnd
 
 
