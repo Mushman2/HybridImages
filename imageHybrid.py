@@ -5,6 +5,7 @@ from skimage.io import imread
 import matplotlib.pyplot as plt
 import scipy.fft as fp
 from skimage.util import random_noise
+from scipy import ndimage
 
 #Combine 2 equally sized images into a hybrid image
 
@@ -14,7 +15,6 @@ def fourierHybrid(imageLow, imageHigh, n):
     #cv2.imshow("imgLo", imageLow)
     #cv2.waitKey(0)
 
-    #TODO: Convert each image to frequency domain. 
     FHi = np.zeros(imageHigh.shape, dtype=np.csingle)
     FLo = np.zeros(imageLow.shape, dtype=np.csingle)
     for channel in range(3): 
@@ -23,9 +23,8 @@ def fourierHybrid(imageLow, imageHigh, n):
 
     #plt.figure(figsize=(10,10))
     #plt.imshow( (20*np.log10( 0.1 + FHi)).astype(int))
-    ##plt.show()
+    #plt.show()
 
-    #TODO: Combine High & Low Frequencies
     (w, h) = imageHigh.shape[:2]
     half_w, half_h = int(w/2), int(h/2)
     nh = int(n/2*h)
@@ -36,8 +35,6 @@ def fourierHybrid(imageLow, imageHigh, n):
     #plt.imshow( (20*np.log10( 0.1 + FHi)).astype(int))
     #plt.show()
 
-    #TODO: Combine Images
-    #TODO: Convert back from frequency domain
     imHi1 = np.zeros(imageHigh.shape, dtype=np.float64)
     for channel in range(3): 
         imHi1[:,:,channel] = fp.ifft2(fp.ifftshift(FHi[:,:,channel])).real#.astype(np.uint8)
@@ -47,14 +44,22 @@ def fourierHybrid(imageLow, imageHigh, n):
     #cv2.waitKey(0)
     return imHi1
 
-def gaussianHybrid():
-    #TODO Gausiann Blur low pass
-    #TODO Edge detect high pass
-    #TODO Combine images
-    return
-
-def gaussianSubtractionHybrid():
+def sobelHybrid(imageLow, imageHigh, n):
     #TODO: Gaussian Blur both images.
+    lowpass = ndimage.gaussian_filter(imageLow, 2-2*n)
+
+    dx = ndimage.sobel(imageHigh, 0)  
+    dy = ndimage.sobel(imageHigh, 1)  
+    hipass = np.hypot(dx, dy)
     #TODO: Perfom subtraction for high pass image
     #TODO: Combine Images
-    return
+    return lowpass + hipass
+
+def gaussianHybrid(imageLow, imageHigh, n):
+    #TODO: Gaussian Blur both images.
+    lowpass = ndimage.gaussian_filter(imageLow, 2-2*n)
+    hiImgLowPass = ndimage.gaussian_filter(imageHigh, 2-2*n)
+    #TODO: Perfom subtraction for high pass image
+    hipass = imageHigh - hiImgLowPass
+    #TODO: Combine Images
+    return lowpass + hipass
