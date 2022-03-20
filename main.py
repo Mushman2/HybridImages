@@ -121,7 +121,7 @@ def refreshImage():
         canvas.itemconfig(canvasImage, image = img)      
         time2 = utils.current_milli_time()
         elapsed = time2 - time1
-        timelabel['text'] = "Time per frame = " + str(elapsed) + "ms"
+        timelabel['text'] = "Time per frame = " + str(elapsed) + "ms | Framerate = " + "{:.2f}".format(1000/elapsed)
 
 threading.Thread(target=refreshImage).start()
 window.mainloop()
