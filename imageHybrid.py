@@ -9,9 +9,15 @@ from scipy import ndimage
 import imageFuncs
 
 #Combine 2 equally sized images into a hybrid image
+def hybridImg(imgLow, imgHigh, mode, n1, n2):
+    if mode == 'gauss':
+        return gaussianHybrid(imgLow, imgHigh, n1, n2)
+    else:
+        return fourierHybrid(imgLow, imgHigh, n1, n2, mode)  
+
 
 #Combine using fourier transform low and high pass filters
-def fourierHybrid(imageLow, imageHigh, n, shape):
+def fourierHybrid(imageLow, imageHigh, n, n2, shape):
     #cv2.imshow("imgHi",imageHigh)
     #cv2.imshow("imgLo", imageLow)
     #cv2.waitKey(0)
@@ -27,7 +33,7 @@ def fourierHybrid(imageLow, imageHigh, n, shape):
     #plt.show()
 
     (w, h) = imageHigh.shape[:2]
-    mask = imageFuncs.generateMask(w,h,shape,n)
+    mask = imageFuncs.generateMask(w,h,shape,n, n2)
     FHi = (FHi * (1 - mask)) + (FLo * (mask))
     
 
@@ -44,11 +50,12 @@ def fourierHybrid(imageLow, imageHigh, n, shape):
     #cv2.waitKey(0)
     return imHi1
 
-def gaussianHybrid(imageLow, imageHigh, n):
+def gaussianHybrid(imageLow, imageHigh, n, n2):
     sigma = 2-2*n
+    sigma2 = 2-2*n2
     #TODO: Gaussian Blur both images.
     lowpass = ndimage.gaussian_filter(imageLow, sigma=(sigma,sigma,0))
-    hiImgLowPass = ndimage.gaussian_filter(imageHigh, sigma=(sigma,sigma,0))
+    hiImgLowPass = ndimage.gaussian_filter(imageHigh, sigma=(sigma2,sigma2,0))
     #TODO: Perfom subtraction for high pass image
     hipass = imageHigh - hiImgLowPass
     #TODO: Combine Images

@@ -2,7 +2,7 @@ from PIL import Image, ImageTk
 import cv2
 import numpy as np
 
-def generateMask(width, height, shape, n):
+def generateMask(width, height, shape, n, n2):
     mask = np.zeros((width, height, 3), dtype=np.csingle)
     half_w, half_h = int(width/2), int(height/2)
     nh = int(n/2*height)
@@ -13,9 +13,23 @@ def generateMask(width, height, shape, n):
         Y, X = np.ogrid[:height, :width]
         center = (int(width/2), int(height/2))
         radius = int(n/2*height)
+        radius2 = int(n2/2*height)
         dist_from_center = np.repeat(np.sqrt((X - center[0])**2 + (Y-center[1])**2).reshape(width, height, 1), 3, axis = 2)
         
-        mask = dist_from_center <= radius
+        if n2 == n:
+            radius = int(n/2*height)
+            mask = dist_from_center <= radius
+        else:
+            if n > n2:
+                radius = int(n/2*height)
+                radius2 = int(n2/2*height)
+            else: 
+                radius2 = int(n/2*height)
+                radius = int(n2/2*height)
+            adjustedbyRadius = (dist_from_center - radius) / (radius2 - radius)
+            mask = np.clip(adjustedbyRadius, 0, 1)
+
+
     return mask
 
 def readyImageForCanvas(picture):
