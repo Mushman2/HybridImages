@@ -7,6 +7,7 @@ import imageFuncs as imf
 import pagination
 import threading
 import utils 
+import datetime;
 
 window = tk.Tk()
 
@@ -21,14 +22,28 @@ slidersLinked = tk.IntVar()
 #imgHi = cv2.resize(cv2.imread("TestImages/Dogge.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
 document = pagination.readDocument("TestDoc1.hpd")
 imgHi, docIdx, docEnd = pagination.generatePage(document, 0)
+
 imgHi = imgHi.astype('float64')/256
-imgLo = cv2.resize(cv2.imread("TestImages/Catte.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+#imgHi = cv2.resize(cv2.imread("TestImages/A.png"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+imgLo = cv2.resize(cv2.imread("TestImages/Grass.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
 picture = imageHybrid.hybridImg(imgLo,imgHi,filterMode,coefficient, coefficient2)       
 img =  imf.readyImageForCanvas(picture)
 
 canvas = tk.Canvas(window,width=600,height=600)
 canvas.pack(side = tk.TOP)
 canvasImage = canvas.create_image(20,20, anchor="nw", image=img)
+
+def nextpage():
+    global docEnd, docIdx, imgHi
+    if docEnd:   
+        return
+    else:
+        imgHi, docIdx, docEnd = pagination.generatePage(document, docIdx)
+        imgHi = imgHi.astype('float64')/256
+
+pageButton = tk.Button(window, text="Next Page", command=nextpage).pack(pady = 2)
+
+
 
 def setCoeff(value):
     global coefficient
@@ -49,6 +64,8 @@ c1.pack()
 
 def switchLowImage(val):
     global imgLo
+    if val == 'grass':
+        imgLo = cv2.resize(cv2.imread("TestImages/Grass.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256        
     if val == 'cat':
         imgLo = cv2.resize(cv2.imread("TestImages/Catte.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
     if val == 'noise':
@@ -76,13 +93,19 @@ def generateSaliencyImage():
     cv2.waitKey(0)
     return
 
+def exportDisplay():
+    #cv2.imshow("Output", picture)
+    cv2.imwrite("output/" + str(datetime.datetime.now()).replace(" ", "").replace(":", "").replace("-", "").replace(".", "") + ".png", picture*255)
+    #cv2.waitKey(0)
+
 bgFrame = tk.Frame(window)
 bgFrame.pack(pady= 2)
 tk.Label(bgFrame, text="Background").grid(row = 0, column = 0)
-tk.Button(bgFrame, text= "Cat", command= lambda: switchLowImage('cat')).grid(row = 0, column = 1)
-tk.Button(bgFrame, text= "Noise", command= lambda:switchLowImage('noise')).grid(row = 0, column = 2)
-tk.Button(bgFrame, text= "S&P", command= lambda:switchLowImage('s&p')).grid(row = 0, column = 3)
-tk.Button(bgFrame, text= "Grey", command= lambda:switchLowImage('grey')).grid(row = 0, column = 4)
+tk.Button(bgFrame, text= "Grass", command= lambda: switchLowImage('grass')).grid(row = 0, column = 1)
+tk.Button(bgFrame, text= "Cat", command= lambda: switchLowImage('cat')).grid(row = 0, column = 2)
+tk.Button(bgFrame, text= "Noise", command= lambda:switchLowImage('noise')).grid(row = 0, column = 3)
+tk.Button(bgFrame, text= "S&P", command= lambda:switchLowImage('s&p')).grid(row = 0, column = 4)
+tk.Button(bgFrame, text= "Grey", command= lambda:switchLowImage('grey')).grid(row = 0, column = 5)
 
 def setMode(mode):
     global filterMode
@@ -98,6 +121,7 @@ tk.Button(algFrame, text= "Fourier - CI", command= lambda:setMode('circle')).gri
 salFrame = tk.Frame(window)
 salFrame.pack(pady=2)
 tk.Button(salFrame, text = "Generate Saliency Image", command=generateSaliencyImage ).grid(row = 0, column = 0)
+tk.Button(salFrame, text = "Export Current Image", command=exportDisplay).grid(row = 0, column = 1)
 
 timelabel = tk.Label(window, text = "Time per frame = Xms, FPS = Y")
 timelabel.pack(pady = 2)
