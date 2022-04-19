@@ -25,13 +25,18 @@ imgHi, docIdx, docEnd = pagination.generatePage(document, 0)
 
 imgHi = imgHi.astype('float64')/256
 #imgHi = cv2.resize(cv2.imread("TestImages/A.png"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
-imgLo = cv2.resize(cv2.imread("TestImages/Grass.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
+imgLo = cv2.resize(cv2.imread("TestImages/Cat.jpg"), (600,600), interpolation = cv2.INTER_NEAREST).astype('float64')/256
 picture = imageHybrid.hybridImg(imgLo,imgHi,filterMode,coefficient, coefficient2)       
 img =  imf.readyImageForCanvas(picture)
 
 canvas = tk.Canvas(window,width=600,height=600)
 canvas.pack(side = tk.TOP)
 canvasImage = canvas.create_image(20,20, anchor="nw", image=img)
+
+def firstPage():
+    global docEnd, docIdx, imgHi
+    imgHi, docIdx, docEnd = pagination.generatePage(document, 0)
+    imgHi = imgHi.astype('float64')/256
 
 def nextpage():
     global docEnd, docIdx, imgHi
@@ -41,7 +46,10 @@ def nextpage():
         imgHi, docIdx, docEnd = pagination.generatePage(document, docIdx)
         imgHi = imgHi.astype('float64')/256
 
-pageButton = tk.Button(window, text="Next Page", command=nextpage).pack(pady = 2)
+pageFrame = tk.Frame(window)
+pageFrame.pack(pady= 2)
+pageButtonBack = tk.Button(pageFrame, text="First Page", command=firstPage).grid(row = 0, column = 0)
+pageButton = tk.Button(pageFrame, text="Next Page", command=nextpage).grid(row = 0, column = 1)
 
 
 
@@ -83,6 +91,10 @@ def switchLowImage(val):
     if val == 'grey':
         imgLo = np.zeros((width, height,3))
         imgLo += 0.5
+    if val == 'grad':
+        imgLo = np.zeros((width, height,3))
+        for idx, _ in enumerate(imgLo):
+            imgLo[idx,:,:] = idx / 600
 
 def generateSaliencyImage():
     saliency = cv2.saliency.StaticSaliencyFineGrained_create()
@@ -106,6 +118,7 @@ tk.Button(bgFrame, text= "Cat", command= lambda: switchLowImage('cat')).grid(row
 tk.Button(bgFrame, text= "Noise", command= lambda:switchLowImage('noise')).grid(row = 0, column = 3)
 tk.Button(bgFrame, text= "S&P", command= lambda:switchLowImage('s&p')).grid(row = 0, column = 4)
 tk.Button(bgFrame, text= "Grey", command= lambda:switchLowImage('grey')).grid(row = 0, column = 5)
+tk.Button(bgFrame, text= "Gradient", command= lambda:switchLowImage('grad')).grid(row = 0, column = 6)
 
 def setMode(mode):
     global filterMode

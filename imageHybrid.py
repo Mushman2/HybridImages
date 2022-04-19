@@ -8,6 +8,12 @@ from skimage.util import random_noise
 from scipy import ndimage
 import imageFuncs
 
+maskCache = mask = np.zeros((600, 600, 3), dtype=np.csingle)
+nCache = -1
+n2Cache = -1
+shapeCache = -1
+
+
 #Combine 2 equally sized images into a hybrid image
 def hybridImg(imgLow, imgHigh, mode, n1, n2):
     if mode == 'gauss':
@@ -18,6 +24,7 @@ def hybridImg(imgLow, imgHigh, mode, n1, n2):
 
 #Combine using fourier transform low and high pass filters
 def fourierHybrid(imageLow, imageHigh, n, n2, shape):
+    global maskCache, nCache, n2Cache, shapeCache
     #return imageHigh
     FHi = np.zeros(imageHigh.shape, dtype=np.csingle)
     FLo = np.zeros(imageLow.shape, dtype=np.csingle)
@@ -26,14 +33,22 @@ def fourierHybrid(imageLow, imageHigh, n, n2, shape):
         FLo[:,:,channel] = fp.fftshift(fp.fft2((imageLow[:,:,channel])))
     #return FLo.real/ 255
     (w, h) = imageHigh.shape[:2]
-    mask = imageFuncs.generateMask(w,h,shape,n, n2)
+    if nCache == n and n2Cache == n2 and shapeCache == shape:
+        mask = maskCache
+    else:
+        mask = imageFuncs.generateMask(w,h,shape,n, n2)
+        maskCache = mask
+        nCache = n
+        n2Cache = n2
+        shapeCache = shape
     #return mask.real
     FHi = (FHi * (1 - mask)) + (FLo * (mask))
     #return FHi.real / 255
     imHi1 = np.zeros(imageHigh.shape, dtype=np.float64)
     for channel in range(3): 
-        imHi1[:,:,channel] = fp.ifft2(fp.ifftshift(FHi[:,:,channel])).real#.astype(np.uint8)
+           imHi1[:,:,channel] = fp.ifft2(fp.ifftshift(FHi[:,:,channel])).real#.astype(np.uint8)
 
+    #return FHi.real / 255
     return imHi1
 
 #Combine using gaussian blur high and low pass filters
